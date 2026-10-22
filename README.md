@@ -1,33 +1,51 @@
 # Nanu Som · Orçamentos
 
-Sistema de orçamentos que roda direto no navegador. Não precisa de servidor, banco de dados nem instalação.
+Sistema de orçamentos que roda direto no navegador, sem servidor e sem banco de dados. Esta versão já traz os **27 orçamentos** que você enviou em PDF.
 
 ## Arquivos para enviar ao GitHub
 
-Apenas dois: `index.html` (o sistema) e `README.md` (este texto, opcional).
+| Arquivo | O que é |
+|---|---|
+| `index.html` | O sistema. |
+| `dados-iniciais.js` | Os orçamentos e clientes antigos (carregados na primeira abertura). |
+| `README.md` | Este guia (opcional). |
 
-## Passo a passo
+Os dois primeiros são obrigatórios e precisam ficar **na mesma pasta**.
 
-1. Entre em https://github.com e faça login (ou crie uma conta gratuita).
-2. Clique no **+** (canto superior direito) e em **New repository**.
-3. Em **Repository name**, digite `nanu-som`. Deixe como **Public** (o GitHub Pages gratuito exige isso). Clique em **Create repository**.
-4. Na página do repositório, clique em **uploading an existing file**.
-5. Arraste o `index.html` (e o `README.md`) para a tela e clique em **Commit changes**.
-6. Vá em **Settings** (aba no alto do repositório) e, no menu da esquerda, em **Pages**.
-7. Em **Source**, escolha **Deploy from a branch**.
-8. Em **Branch**, escolha **main** e a pasta **/ (root)**. Clique em **Save**.
-9. Espere 1 a 2 minutos e atualize a página. O endereço aparece no topo, assim:
+## Como publicar (você já tem o repositório `nanu-som`)
 
-   `https://SEU-USUARIO.github.io/nanu-som/`
+1. Entre em https://github.com e abra o repositório `nanu-som`.
+2. Clique em **Add file → Upload files**.
+3. Arraste `index.html` e `dados-iniciais.js` para a tela. (Se o GitHub avisar que já existem arquivos com esses nomes, tudo bem: eles serão substituídos.)
+4. Clique em **Commit changes**.
+5. Espere 1 a 2 minutos. Abra o endereço do site (`https://SEU-USUARIO.github.io/nanu-som/`) e use **Ctrl + F5** (no celular, feche e abra o navegador) para carregar a versão nova.
 
-## Antes de usar
+Se você ainda não tem o repositório: **+ → New repository**, nome `nanu-som`, **Public**; envie os arquivos como acima; depois **Settings → Pages → Source: Deploy from a branch → Branch: main, pasta / (root) → Save**.
 
-- **Os dados ficam só no navegador de cada aparelho.** Não são enviados ao GitHub nem sincronizam entre computadores e celulares.
-- Faça o backup sempre: **Configurações → Exportar backup**. Guarde o arquivo em local seguro.
-- Limpar os dados do navegador apaga os orçamentos que não tiverem backup.
-- **O login não é segurança de verdade.** Ele é conferido no próprio navegador e, com o repositório público, qualquer pessoa pode ver o código. Por isso, nunca coloque dados sigilosos no código (só no sistema, que guarda no navegador).
-- O sistema usa a fonte Barlow do Google Fonts. Sem internet ele funciona, só com outra fonte.
+## O que acontece na primeira abertura
 
-## O que ainda precisaria de servidor (não incluso)
+- O sistema lê o `dados-iniciais.js` e **junta** os orçamentos antigos com o que já existe no navegador. **Nada é apagado nem sobrescrito.** Só entra o que ainda não existe.
+- Antes de juntar, ele guarda uma cópia dos dados atuais no próprio navegador. Se der qualquer erro, seus dados ficam exatamente como estavam.
+- Aparece um aviso "Importação inicial: N orçamento(s) adicionado(s)". O resumo fica em **Configurações → Orçamentos importados**.
+- Isso acontece **uma única vez por navegador**. Se você apagar um orçamento depois, ele não volta.
+- Onde já há orçamentos (o notebook em que você os criou), os que já existem **não são alterados**. Os orçamentos do Lipeh (nº 0007) e do Moraes (nº 0011), que foram impressos em versões diferentes, são comparados pelo conteúdo: o que for diferente do que já está no sistema entra como **orçamento novo, com número novo**. Veja o `RELATORIO-IMPORTACAO.md`.
 
-Login seguro, dados compartilhados entre aparelhos, backup automático e anexar o PDF no WhatsApp sozinho.
+## Entrada e saldo restante (novo)
+
+Na tela de criar/editar orçamento, o campo **Entrada solicitada (R$)** é opcional. Ao preencher, o sistema calcula o **saldo restante** (total − entrada) na hora. No orçamento mostrado ao cliente, na impressão e no PDF aparecem as linhas **Entrada** e **Saldo restante**, mas só quando há entrada. A entrada não pode ser maior que o total. Orçamentos antigos não têm entrada.
+
+## Limites que você precisa conhecer
+
+- **Os dados ficam só no navegador de cada aparelho.** O notebook e o celular **não** se sincronizam: o celular recebe os mesmos 27 orçamentos antigos na primeira abertura, mas o que você criar depois fica só onde foi criado. Para levar de um aparelho a outro, use **Configurações → Exportar backup** e **Importar backup** (a importação do backup **substitui** os dados do aparelho; confirme antes).
+- Limpar os dados do navegador apaga os orçamentos que não estiverem em backup. Exporte um backup de vez em quando.
+- **O login só confere no navegador e não protege dados.** Com repositório público, qualquer pessoa pode ver o código do site.
+
+## ⚠️ Privacidade: leia antes de publicar
+
+O arquivo `dados-iniciais.js` contém **nomes e telefones dos seus clientes**, junto com os orçamentos. No GitHub Pages gratuito o repositório é **público**: qualquer pessoa que souber o endereço do arquivo consegue ler esses dados, mesmo sem entrar no sistema.
+
+Opções para evitar:
+- Usar um repositório **privado** com GitHub Pages (disponível apenas em planos pagos do GitHub); ou
+- Não publicar o `dados-iniciais.js` e, em vez disso, levar os orçamentos de cada aparelho por **backup** (arquivo guardado só com você).
+
+Se preferir não expor os dados, me avise que eu preparo essa versão.
