@@ -1,51 +1,47 @@
-# Nanu Som · Orçamentos
+# NANU SOM · Orçamentos — atualização de 22/10 (documento do cliente)
 
-Sistema de orçamentos que roda direto no navegador, sem servidor e sem banco de dados. Esta versão já traz os **27 orçamentos** que você enviou em PDF.
-
-## Arquivos para enviar ao GitHub
+Arquivos (todos na raiz do repositório do GitHub Pages):
 
 | Arquivo | O que é |
 |---|---|
-| `index.html` | O sistema. |
-| `dados-iniciais.js` | Os orçamentos e clientes antigos (carregados na primeira abertura). |
-| `README.md` | Este guia (opcional). |
+| `index.html` | O sistema completo (substitui o atual). |
+| `dados-iniciais.js` | Os 27 orçamentos importados dos PDFs (substitui o atual). |
+| `README.md` | Este guia (opcional no repositório). |
+| `RELATORIO-IMPORTACAO.md` | Relatório da importação dos 27 PDFs (opcional). |
 
-Os dois primeiros são obrigatórios e precisam ficar **na mesma pasta**.
+## O que mudou no orçamento que o cliente recebe
+1. **OBSERVAÇÕES IMPORTANTES**: bloco próprio, com borda azul, fundo claro e texto de 16,5 px, logo abaixo dos dados do cliente e **antes dos itens**. O texto aparece completo e o bloco não é cortado ao meio na impressão/PDF.
+2. **Valores com nova hierarquia** (quando há entrada):
+   - *Valor total do orçamento* (legível, sem destaque máximo);
+   - *Entrada paga* + "Valor já recebido" (ou *Entrada solicitada* + "Pendente: ainda não recebida");
+   - **Falta pagar / Saldo restante**: o maior destaque (barra preta, letra grande).
+   Exemplo: total R$ 500,00 · entrada paga R$ 100,26 · falta pagar R$ 399,74.
+3. **Situação da entrada**: novo campo no editor, "Pendente" (padrão) ou "Paga". A entrada só é tratada como recebida quando marcada como **Paga**.
+4. Sem entrada: o documento continua com a barra "Total" de sempre e uma linha pequena "Entrada: não solicitada".
 
-## Como publicar (você já tem o repositório `nanu-som`)
+5. **Impressão/PDF**: o bloco de totais, as observações e o rodapé não são cortados ao meio. Em orçamentos com muitos itens, os totais podem ir para a página 2, juntos com as condições e o rodapé.
 
-1. Entre em https://github.com e abra o repositório `nanu-som`.
-2. Clique em **Add file → Upload files**.
-3. Arraste `index.html` e `dados-iniciais.js` para a tela. (Se o GitHub avisar que já existem arquivos com esses nomes, tudo bem: eles serão substituídos.)
-4. Clique em **Commit changes**.
-5. Espere 1 a 2 minutos. Abra o endereço do site (`https://SEU-USUARIO.github.io/nanu-som/`) e use **Ctrl + F5** (no celular, feche e abra o navegador) para carregar a versão nova.
+Nada mais foi alterado: clientes, produtos, medidas das caixas, itens, histórico, impressão, PDF e WhatsApp seguem iguais. A litragem continua oculta do cliente.
 
-Se você ainda não tem o repositório: **+ → New repository**, nome `nanu-som`, **Public**; envie os arquivos como acima; depois **Settings → Pages → Source: Deploy from a branch → Branch: main, pasta / (root) → Save**.
+## ⚠️ Única mudança que mexe em dados já existentes
+Antes, o saldo era sempre *total − entrada*. Agora o saldo é *total − pagamentos já recebidos*. Por isso:
+- **Orçamentos antigos que tinham valor de entrada, mas nenhum status, passam a aparecer como "Entrada solicitada" (pendente)** e o "Falta pagar" será o total. Nenhum valor é alterado nem apagado.
+- Para os que já foram pagos: abra o orçamento → **Editar** → "Situação da entrada" = **Paga** → Salvar.
+- Orçamentos sem entrada não mudam.
 
-## O que acontece na primeira abertura
+## Como atualizar sem perder nada
+Os orçamentos ficam **dentro do navegador** (não nos arquivos do GitHub). Substituir os arquivos não apaga os dados, mas faça o backup mesmo assim:
+1. No sistema atual (nos aparelhos que têm dados): **Configurações → Exportar backup** e guarde o arquivo `.json`.
+2. No GitHub: repositório → **Add file → Upload files** → arraste `index.html` e `dados-iniciais.js` (substituem os antigos) → **Commit changes**.
+3. Espere 1–2 minutos e abra `https://nanusom.github.io/nanu-som/` (atualize com Ctrl+F5; no celular, recarregue a página).
+4. Confira se os orçamentos continuam lá. Se algo parecer errado, use **Configurações → Importar backup** com o arquivo do passo 1.
+5. Marque como **Paga** as entradas já recebidas (ver aviso acima).
 
-- O sistema lê o `dados-iniciais.js` e **junta** os orçamentos antigos com o que já existe no navegador. **Nada é apagado nem sobrescrito.** Só entra o que ainda não existe.
-- Antes de juntar, ele guarda uma cópia dos dados atuais no próprio navegador. Se der qualquer erro, seus dados ficam exatamente como estavam.
-- Aparece um aviso "Importação inicial: N orçamento(s) adicionado(s)". O resumo fica em **Configurações → Orçamentos importados**.
-- Isso acontece **uma única vez por navegador**. Se você apagar um orçamento depois, ele não volta.
-- Onde já há orçamentos (o notebook em que você os criou), os que já existem **não são alterados**. Os orçamentos do Lipeh (nº 0007) e do Moraes (nº 0011), que foram impressos em versões diferentes, são comparados pelo conteúdo: o que for diferente do que já está no sistema entra como **orçamento novo, com número novo**. Veja o `RELATORIO-IMPORTACAO.md`.
+A importação inicial dos 27 PDFs é **aditiva**: só acrescenta o que faltar, não sobrescreve, não repete números e faz uma cópia de segurança automática no navegador antes de mexer. Detalhes em `RELATORIO-IMPORTACAO.md` da entrega anterior.
 
-## Entrada e saldo restante (novo)
-
-Na tela de criar/editar orçamento, o campo **Entrada solicitada (R$)** é opcional. Ao preencher, o sistema calcula o **saldo restante** (total − entrada) na hora. No orçamento mostrado ao cliente, na impressão e no PDF aparecem as linhas **Entrada** e **Saldo restante**, mas só quando há entrada. A entrada não pode ser maior que o total. Orçamentos antigos não têm entrada.
-
-## Limites que você precisa conhecer
-
-- **Os dados ficam só no navegador de cada aparelho.** O notebook e o celular **não** se sincronizam: o celular recebe os mesmos 27 orçamentos antigos na primeira abertura, mas o que você criar depois fica só onde foi criado. Para levar de um aparelho a outro, use **Configurações → Exportar backup** e **Importar backup** (a importação do backup **substitui** os dados do aparelho; confirme antes).
-- Limpar os dados do navegador apaga os orçamentos que não estiverem em backup. Exporte um backup de vez em quando.
-- **O login só confere no navegador e não protege dados.** Com repositório público, qualquer pessoa pode ver o código do site.
-
-## ⚠️ Privacidade: leia antes de publicar
-
-O arquivo `dados-iniciais.js` contém **nomes e telefones dos seus clientes**, junto com os orçamentos. No GitHub Pages gratuito o repositório é **público**: qualquer pessoa que souber o endereço do arquivo consegue ler esses dados, mesmo sem entrar no sistema.
-
-Opções para evitar:
-- Usar um repositório **privado** com GitHub Pages (disponível apenas em planos pagos do GitHub); ou
-- Não publicar o `dados-iniciais.js` e, em vez disso, levar os orçamentos de cada aparelho por **backup** (arquivo guardado só com você).
-
-Se preferir não expor os dados, me avise que eu preparo essa versão.
+## Avisos honestos
+- O login (nanosom / ns@24) roda no próprio navegador: **não é segurança de verdade**.
+- Repositório gratuito do GitHub Pages é **público**: `dados-iniciais.js` expõe nomes e telefones de clientes. Para evitar, remova esse arquivo depois da importação (os dados já ficam no navegador) e importe por backup nos outros aparelhos.
+- Os dados são por navegador/aparelho: o celular não vê o que está no notebook sem Exportar/Importar backup.
+- O azul foi usado nas observações e na entrada; o cabeçalho e a barra "Falta pagar" mantêm o preto/vermelho da marca.
+- O PDF continua sendo gerado pela impressão do navegador ("Salvar como PDF"); o WhatsApp abre a mensagem pronta, sem anexar o arquivo.

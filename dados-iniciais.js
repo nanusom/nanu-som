@@ -284,7 +284,9 @@ window.NANU_SEED={
     "impressoEm": "2026-10-07T20:11",
     "variante": false,
     "total": 2100.0
-   }
+   },
+   "entrada": 100,
+   "entradaPaga": true
   },
   {
    "id": "etkcy63",

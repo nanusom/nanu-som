@@ -90,6 +90,14 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 :root{padding:0}body{background:#fff}.side,.noprint{display:none!important}.main{padding:0;max-width:none}.doc{border:0;padding:0}
 }
 .imp-note{margin:-6px 0 12px}
+@media print{#toast{display:none!important}.doc .tw,.doc .bx,.doc tr{break-inside:avoid;page-break-inside:avoid}.doc .sec{break-after:avoid;page-break-after:avoid}.doc .df{break-before:avoid;page-break-before:avoid}}
+.doc .tw{max-width:400px}.doc .tw .vt{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:8px;padding:8px 0;border-top:1px solid #bbb;font:600 19px Inter,Arial,sans-serif;color:#222}
+.doc .tw .ent{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:6px;padding:9px 12px;border:1px solid #1e5aa8;border-left-width:5px;border-radius:6px;background:#f3f7fc;color:#14305a}
+.doc .tw .ent.pend{border-color:#9aa5b5;background:#f6f6f6;color:#333}.doc .tw .ent b{display:block;font-size:15px}.doc .tw .ent small{display:block;font-size:12.5px;font-weight:500;opacity:.85}.doc .tw .ent>span{font:700 21px Inter,Arial,sans-serif}
+.doc .tw .gt small{display:block;font:500 13px Inter,Arial,sans-serif;opacity:.85;letter-spacing:.02em}.doc .tw .gt.falta{margin-top:8px}
+.doc .obsbox{margin:18px 0 6px;border:2px solid #1e5aa8;border-radius:8px;background:#f5f8fc;color:#16202e;padding:14px 18px;break-inside:avoid;page-break-inside:avoid}
+.doc .obsh{font:800 17px Inter,Arial,sans-serif;letter-spacing:.06em;color:#1e5aa8;margin-bottom:8px;text-transform:uppercase}
+.doc .obst{font-size:16.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -138,7 +146,8 @@ const Calc={
  item:i=>(+i.qty||0)*(+i.price||0),
  sub:q=>q.boxes.reduce((s,b)=>s+Calc.box(b),0)+q.items.reduce((s,i)=>s+Calc.item(i),0),
  total:q=>Math.max(0,Calc.sub(q)-(+q.discount||0)),
- saldo:q=>Math.max(0,Calc.total(q)-(+q.entrada||0))
+ // saldo = total − pagamentos já RECEBIDOS (entrada só conta quando marcada como paga)
+ saldo:q=>Math.max(0,Calc.total(q)-(q.entradaPaga?(+q.entrada||0):0))
 };
 const lit=b=>Calc.liters(b.c,b.a,b.p,b.esp).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L';
 
@@ -201,10 +210,11 @@ function Editor(id,cid){const cl=cid&&Repo.clients.get(cid);
  <div id="items"></div><button class="btn sm" style="margin-top:12px" onclick="addItem()">+ Item avulso</button></div>
  <div class="card"><div class="grid g2">
  <div>${fld('Desconto (R$)',`<input type="number" min="0" step="0.01" value="${draft.discount||''}" oninput="draft.discount=+this.value;upd()">`)}
- <div style="height:12px"></div>${fld('Entrada solicitada (R$)',`<input type="number" min="0" step="0.01" value="${draft.entrada||''}" placeholder="Opcional" oninput="draft.entrada=+this.value;upd()">`)}
+ <div style="height:12px"></div>${fld('Valor da entrada (R$)',`<input type="number" min="0" step="0.01" value="${draft.entrada||''}" placeholder="Opcional" oninput="draft.entrada=+this.value;upd()">`)}
+ <div style="height:12px"></div>${fld('Situação da entrada',`<select onchange="draft.entradaPaga=this.value==='1';upd()"><option value="0" ${draft.entradaPaga?'':'selected'}>Pendente (solicitada, ainda não recebida)</option><option value="1" ${draft.entradaPaga?'selected':''}>Paga (valor já recebido)</option></select>`)}
  <div style="height:12px"></div>${fld('Status',`<select onchange="draft.status=this.value">${STATUS.map(s=>`<option ${draft.status===s?'selected':''}>${s}</option>`).join('')}</select>`)}</div>
  ${fld('Observações',`<textarea rows="5" oninput="draft.obs=this.value" placeholder="Prazo, forma de pagamento, detalhes adicionais...">${esc(draft.obs)}</textarea>`)}</div>
- <div style="margin-top:14px;text-align:right"><div class="mut sm">Subtotal <span id="sub"></span></div><div class="tot" id="tot"></div><div class="mut sm" id="sal-w" style="display:none">Entrada <span id="ent"></span> · Saldo restante <b id="sal"></b></div></div></div>
+ <div style="margin-top:14px;text-align:right"><div class="mut sm">Subtotal <span id="sub"></span></div><div class="tot" id="tot"></div><div class="mut sm" id="sal-w" style="display:none"><span id="entl">Entrada</span> <span id="ent"></span> · Falta pagar <b id="sal"></b></div></div></div>
  <div class="row"><button class="btn pri" onclick="saveQ()">Salvar orçamento</button><a class="btn" href="#/orcamentos">Cancelar</a></div>`;
 }
 function boxCard(b){const i=b.id;
@@ -229,7 +239,7 @@ function upd(){
  draft.boxes.forEach(b=>{$('#lit-'+b.id).textContent=lit(b);$('#vol-'+b.id).textContent=vol(b);$('#bt-'+b.id).textContent=brl(Calc.box(b))});
  draft.items.forEach(i=>$('#it-'+i.id).textContent=brl(Calc.item(i)));
  $('#sub').textContent=brl(Calc.sub(draft));$('#tot').textContent=brl(Calc.total(draft));
- {const e=+draft.entrada||0,w=$('#sal-w');if(w){w.style.display=e>0?'block':'none';$('#ent').textContent=brl(e);$('#sal').textContent=brl(Calc.saldo(draft))}}
+ {const e=+draft.entrada||0,w=$('#sal-w');if(w){w.style.display=e>0?'block':'none';$('#entl').textContent=draft.entradaPaga?'Entrada paga':'Entrada solicitada (pendente)';$('#ent').textContent=brl(e);$('#sal').textContent=brl(Calc.saldo(draft))}}
 }
 const sb=(id,k,v)=>{const b=draft.boxes.find(x=>x.id===id);b[k]=['model','material','acab','notes'].includes(k)?v:+v;upd()};
 const si=(id,k,v)=>{const b=draft.items.find(x=>x.id===id);b[k]=k==='name'?v:+v;upd()};
@@ -246,7 +256,7 @@ function validQ(){const ph=dg(draft.client.phone);if(ph&&(ph.length<10||ph.lengt
  for(const b of draft.boxes){if(![b.c,b.a,b.p].every(v=>okN(v)&&+v>=0))return 'Confira as medidas da caixa.';if(!okN(b.qty)||+b.qty<=0)return 'A quantidade da caixa deve ser maior que zero.';if(!okN(b.price)||+b.price<0)return 'Confira o valor da caixa.'}
  for(const i of draft.items){if(!String(i.name||'').trim())return 'Informe a descrição de todos os itens.';if(!okN(i.qty)||+i.qty<=0)return 'A quantidade dos itens deve ser maior que zero.';if(!okN(i.price)||+i.price<0)return 'Confira os valores dos itens.'}
  const d=+draft.discount||0;if(!okN(draft.discount||0)||d<0)return 'Desconto inválido.';if(d>Calc.sub(draft))return 'O desconto não pode ser maior que o subtotal.';
- const en=+draft.entrada||0;if(!okN(draft.entrada||0)||en<0)return 'Entrada inválida.';if(en>Calc.total(draft))return 'A entrada não pode ser maior que o total.';return ''}
+ const en=+draft.entrada||0;if(!okN(draft.entrada||0)||en<0)return 'Entrada inválida.';if(en>Calc.total(draft))return 'A entrada não pode ser maior que o total.';if(draft.entradaPaga&&!(en>0))return 'Informe o valor da entrada paga ou marque a entrada como pendente.';return ''}
 function saveQ(){
  if(!draft.client.name.trim()){$('#cn').focus();$('#cn').style.borderColor='var(--danger)';return}
  const bad=validQ();if(bad){toast(bad);return}
@@ -255,6 +265,13 @@ function saveQ(){
 }
 
 /* ===== Detalhes + documento ===== */
+function obsHTML(q){return q.obs&&String(q.obs).trim()?'<div class="obsbox"><div class="obsh">OBSERVAÇÕES IMPORTANTES</div><div class="obst">'+esc(q.obs)+'</div></div>':''}
+function totaisHTML(q){const sub=Calc.sub(q),d=+q.discount||0,e=+q.entrada||0,tot=Calc.total(q),paga=!!q.entradaPaga&&e>0;
+ const top='<div class="tw"><div class="tt"><span>Subtotal</span><span>'+brl(sub)+'</span></div>'+(d?'<div class="tt"><span>Desconto</span><span>− '+brl(d)+'</span></div>':'');
+ if(!(e>0))return top+'<div class="gt"><span>Total</span><span>'+brl(tot)+'</span></div><div class="mut sm" style="text-align:right;margin-top:6px">Entrada: não solicitada</div></div>';
+ return top+'<div class="vt"><span>Valor total do orçamento</span><span>'+brl(tot)+'</span></div>'
+  +'<div class="ent '+(paga?'pago':'pend')+'"><div><b>'+(paga?'Entrada paga':'Entrada solicitada')+'</b><small>'+(paga?'Valor já recebido':'Pendente: ainda não recebida')+'</small></div><span>'+brl(e)+'</span></div>'
+  +'<div class="gt falta"><span>Falta pagar<small>Saldo restante</small></span><span>'+brl(Calc.saldo(q))+'</span></div></div>'}
 function impNote(q){const i=q.importado;if(!i)return '';const alt=i.variante?' É uma versão alternativa do orçamento nº '+esc(i.numeroOriginal)+(String(i.numeroOriginal)!==String(q.num)?' (por isso recebeu o nº '+esc(q.num)+')':'')+'.':'';
  return '<p class="mut sm imp-note">Importado do PDF “'+esc(i.arquivo)+'”.'+alt+'</p>'}
 function Detail(id){
@@ -271,9 +288,8 @@ function docHTML(q){const S=DB.settings,sub=Calc.sub(q),d=+q.discount||0;
  const items=q.items.length?`<div class="scroll"><table><tr><th>Descrição</th><th class="r">Qtd</th><th class="r">Unitário</th><th class="r">Total</th></tr>${q.items.map(i=>`<tr><td>${esc(i.name)}</td><td class="r">${i.qty}</td><td class="r">${brl(i.price)}</td><td class="r">${brl(Calc.item(i))}</td></tr>`).join('')}</table></div>`:'';
  return `<div class="doc"><div class="dh"><img src="${LOGO}" alt="${esc(S.name)}"><div class="dm"><div class="dt">Orçamento</div><b>nº ${q.num}</b><div>Emitido em ${fmtDate(q.date)}</div><div>Válido por ${S.validity} dias</div></div></div><div class="bar"></div>
  <div class="db"><div class="dcl"><div class="lb">Cliente</div><b style="font-size:17px">${esc(q.client.name)}</b><div>${esc(q.client.phone)}</div></div>
- <div class="sec">Itens do orçamento</div>${boxes}${items}
- <div class="tw"><div class="tt"><span>Subtotal</span><span>${brl(sub)}</span></div>${d?`<div class="tt"><span>Desconto</span><span>− ${brl(d)}</span></div>`:''}<div class="gt"><span>Total</span><span>${brl(Calc.total(q))}</span></div>${(+q.entrada||0)>0?`<div class="tt"><span>Entrada</span><span>${brl(+q.entrada)}</span></div><div class="tt" style="font-weight:700"><span>Saldo restante</span><span>${brl(Calc.saldo(q))}</span></div>`:''}</div>
- ${q.obs?`<div class="sec">Observações</div><div class="sm" style="white-space:pre-wrap">${esc(q.obs)}</div>`:''}
+ ${obsHTML(q)}<div class="sec">Itens do orçamento</div>${boxes}${items}
+ ${totaisHTML(q)}
  <div class="sm" style="margin-top:18px;color:#666">${esc(S.terms)}</div></div>
  <div class="df">${[S.phone,S.insta,S.address].filter(Boolean).map(esc).join(' · ')}</div></div>`;
 }
@@ -371,7 +387,7 @@ function ensureClient(){if(draft.clientId&&Repo.clients.get(draft.clientId))retu
 
 /* ===== Ações do orçamento ===== */
 function setSt(id,s){const q=Repo.quotes.get(id);q.status=s;Repo.quotes.save(q);const b=$('#stb');if(b){b.textContent=s;b.className='badge s'+STATUS.indexOf(s)}toast('Status: '+s)}
-function dup(id){const o=JSON.parse(JSON.stringify(Repo.quotes.get(id)));o.id=uid();o.num=Repo.nextNum();o.date=today();o.status='Rascunho';o.boxes.forEach(b=>b.id=uid());o.items.forEach(i=>i.id=uid());
+function dup(id){const o=JSON.parse(JSON.stringify(Repo.quotes.get(id)));o.id=uid();o.num=Repo.nextNum();o.date=today();o.status='Rascunho';o.entradaPaga=false;o.boxes.forEach(b=>b.id=uid());o.items.forEach(i=>i.id=uid());
  Repo.quotes.save(o);toast('Orçamento duplicado');go('orcamento/'+o.id)}
 function wa(id){const q=Repo.quotes.get(id);let ph=dg(q.client.phone);if(!ph){toast('Cliente sem telefone cadastrado');return}if(ph.length<=11)ph='55'+ph;
  const m=`Olá, ${q.client.name}.\n\nSegue o orçamento nº ${q.num} da ${DB.settings.name}.\n\nValor total: ${brl(Calc.total(q))}\n\nVou te enviar o PDF do orçamento em seguida.`;
